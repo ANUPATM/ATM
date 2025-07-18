@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>ATM</title>
+<style>
+  /* (Same CSS as before — omitted for brevity, just use previous full CSS from last code) */
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: url('bg.png') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #00fff5;
+    user-select: none;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #container {
+    background: rgba(10,10,10,0);
+    border-radius: 1.5vw;
+    box-shadow: 0 0 3vw #00ffd8;
+    width: 90vw;
+    max-width: 960px;
+    aspect-ratio: 16 / 9;
+    display: flex;
+    flex-direction: column;
+    padding: 3vw 4vw;
+    box-sizing: border-box;
+    color: #00fff5;
+    max-height: 90vh;
+  }
+  #header {
+    font-size: 4vw;
+    font-weight: 900;
+    letter-spacing: 0.7vw;
+    color: #00fff5;
+    text-align: center;
+    margin-bottom: 1vh;
+    user-select: none;
+    text-shadow: 0 0 1vw #00fff5;
+  }
+  #greeting {
+    font-weight: 700;
+    font-size: 2.8vw;
+    color: #00fff5;
+    text-align: center;
+    margin-bottom: 3vh;
+    letter-spacing: 0.1vw;
+    user-select: none;
+  }
+  #authScreen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  #authScreen h2 {
+    font-size: 3vw;
+    font-weight: 700;
+    margin-bottom: 4vh;
+    color: #00fff5;
+    text-shadow: 0 0 0.4vw #00fff5;
+    user-select: none;
+  }
+  #authScreen input {
+    width: 80vw;
+    max-width: 320px;
+    margin-bottom: 1.5vh;
+    padding: 1.2vh 1.5vw;
+    font-size: 3vw;
+    border-radius: 1vw;
+    border: none;
+    background: rgba(0,0,0,0.3);
+    color: #00fff5;
+    box-shadow: inset 0 0 0.6vw #00bfae;
+    outline-offset: 0.3vw;
+  }
+  #authScreen input::placeholder {
+    color: #88ffffaa;
+  }
+  #authScreen input:focus {
+    outline: none;
+    box-shadow: 0 0 1vw #00bfae;
+    background: rgba(0,0,0,0.6);
+  }
+  #authScreen button {
+    width: 80vw;
+    max-width: 320px;
+    padding: 1.5vh 0;
+    font-size: 3vw;
+    font-weight: 700;
+    background: transparent;
+    border: 2px solid #00bfae;
+    border-radius: 1vw;
+    color: #00fff5;
+    cursor: pointer;
+    box-shadow: 0 0 1.2vw #00bfae;
+    transition: background 0.3s ease;
+    user-select:none;
+  }
+  #authScreen button:hover {
+    background: rgba(0,191,174,0.15);
+    box-shadow: 0 0 1.6vw #00fff5;
+  }
+  #authScreen button:active {
+    background: rgba(0,191,174,0.3);
+    transform: scale(0.97);
+  }
+  #mainContent {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+  }
+  #buttonsContainer {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+  }
+  .btnCol {
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  button.btn {
+    background: transparent;
+    border: 2px solid #00bfae;
+    border-radius: 1vw;
+    padding: 1.5vh 0;
+    font-size: 3vw;
+    font-weight: 700;
+    color: #00fff5;
+    cursor: pointer;
+    box-shadow: 0 0 1.2vw #00bfae;
+    margin-bottom: 2vh;
+    user-select: none;
+    transition: background 0.3s ease;
+  }
+  button.btn:last-child {
+    margin-bottom: 0;
+  }
+  button.btn:hover {
+    background: rgba(0,191,174,0.15);
+    box-shadow: 0 0 1.6vw #00fff5;
+  }
+  button.btn:active {
+    background: rgba(0,191,174,0.3);
+    transform: scale(0.97);
+    box-shadow: 0 0 1.4vw #00fff5;
+  }
+  #btnLogout {
+    background: transparent !important;
+    border-color: #b22222 !important;
+    box-shadow: 0 0 1.8vw #b22222 !important;
+    margin-top: 3vh;
+    width: 100%;
+    color: #ff8080 !important;
+  }
+  #btnLogout:hover {
+    background: rgba(178,34,34,0.15) !important;
+    box-shadow: 0 0 2.4vw #ff6060 !important;
+  }
+  #btnLogout:active {
+    background: rgba(178,34,34,0.3) !important;
+    transform: scale(0.97);
+  }
+
+  /* Popup */
+  #popup {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  #popupContent {
+    background: #111;
+    padding: 3vh 3vw;
+    border-radius: 1vw;
+    width: 90vw;
+    max-width: 420px;
+    box-shadow: 0 0 3vw #00fff5;
+    color: #ccfffb;
+    font-size: 1.15rem;
+    user-select:none;
+  }
+  #popup.hidden {
+    display: none;
+  }
+  #popup h3 {
+    margin-top: 0;
+    margin-bottom: 3vh;
+    text-align: center;
+    font-weight: 800;
+    color: #00ffe5;
+    text-shadow: 0 0 0.6vw #00ffe5;
+  }
+  #popupBody input, #popupBody select {
+    width: 100%;
+    padding: 1vh 1vw;
+    margin: 1.2vh 0;
+    border-radius: 1vw;
+    border: none;
+    background: #222;
+    color: #ccc;
+    font-size: 1.3rem;
+    user-select:text;
+  }
+  #popupButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3vh;
+  }
+  #popupButtons button {
+    width: 48%;
+    padding: 1.5vh 0;
+    font-weight: 700;
+    border-radius: 1vw;
+    border: none;
+    cursor: pointer;
+    background: #00bfae;
+    color: #002f2c;
+    user-select:none;
+    transition: background 0.3s ease;
+    font-size: 1.3rem;
+  }
+  #popupButtons button:hover {
+    background: #009982;
+  }
+  #popupButtons button:active {
+    background: #007661;
+    transform: scale(0.97);
+  }
+
+  @media (max-width: 400px) {
+    #container {
+      width: 98vw;
+      padding: 2vw 3vw;
+    }
+    #header {
+      font-size: 6vw;
+      letter-spacing: 0.3vw;
+    }
+    #greeting {
+      font-size: 4vw;
+    }
+    #authScreen input, #authScreen button,
+    button.btn {
+      font-size: 4vw;
+      max-width: 100%;
+      width: 100%;
+    }
+    #buttonsContainer {
+      flex-direction: column;
+      gap: 2vh;
+    }
+    .btnCol {
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    .btnCol button.btn {
+      margin-bottom: 0;
+      width: 32%;
+      padding: 1vh 0;
+    }
+    #btnLogout {
+      width: 100%;
+      margin-top: 3vh;
+    }
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <div id="header">ATM</div>
+    <div id="greeting" style="display:none;"></div>
+
+    <div id="authScreen">
+      <h2>LOGIN TO YOUR ACCOUNT</h2>
+      <input type="text" id="authUsername" placeholder="USERNAME" autocomplete="off" autocapitalize="characters" />
+      <input type="password" id="authPassword" placeholder="PASSWORD" maxlength="20" autocomplete="off" />
+      <input type="password" id="authPin" placeholder="4-DIGIT PIN" maxlength="4" inputmode="numeric" autocomplete="off" />
+      <button id="authSubmit">Login / Create</button>
+    </div>
+
+    <div id="mainContent">
+      <div id="buttonsContainer">
+        <div class="btnCol">
+          <button id="btnShowBalance" class="btn">SHOW BALANCE</button>
+          <button id="btnInputMoney" class="btn">INPUT MONEY</button>
+          <button id="btnWithdrawMoney" class="btn">WITHDRAW</button>
+        </div>
+        <div class="btnCol">
+          <button id="btnTransferMoney" class="btn">TRANSFER</button>
+          <button id="btnChangePin" class="btn">CHANGE PIN</button>
+          <button id="btnLogout" class="btn">LOGOUT</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="popup" class="hidden" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
+    <div id="popupContent">
+      <h3 id="popupTitle"></h3>
+      <div id="popupBody"></div>
+      <div id="popupButtons">
+        <button id="popupCancel" type="button">Cancel</button>
+        <button id="popupConfirm" type="button">OK</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const STORAGE_KEY = 'atmAccountsData';
+  let accounts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  let currentUser = null;
+
+  const authScreen = document.getElementById('authScreen');
+  const mainContent = document.getElementById('mainContent');
+  const greeting = document.getElementById('greeting');
+
+  const authUsername = document.getElementById('authUsername');
+  const authPassword = document.getElementById('authPassword');
+  const authPin = document.getElementById('authPin');
+  const authSubmit = document.getElementById('authSubmit');
+
+  const popup = document.getElementById('popup');
+  const popupTitle = document.getElementById('popupTitle');
+  const popupBody = document.getElementById('popupBody');
+  const popupCancel = document.getElementById('popupCancel');
+  const popupConfirm = document.getElementById('popupConfirm');
+
+  function toUpper(str){ return (str||'').toUpperCase().trim(); }
+  function createEmptyNotes() {
+    return {5:0,10:0,20:0,50:0,100:0,500:0,1000:0};
+  }
+  function saveAccounts() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
+  }
+  function atmBalance(account){
+    return Object.entries(account.notes).reduce((sum, [note,count]) => sum + note*count, 0);
+  }
+  function showPopup(title, html, onConfirm, keepOpenUntilCallback = false) {
+    popupTitle.textContent = title;
+    popupBody.innerHTML = html;
+    popup.classList.remove('hidden');
+    popup.focus();
+
+    popupCancel.onclick = () => {
+      popup.classList.add('hidden');
+    };
+    popupConfirm.onclick = () => {
+      if(keepOpenUntilCallback){
+        onConfirm();
+        // callback responsible for closing popup
+      } else {
+        popup.classList.add('hidden');
+        if(onConfirm) onConfirm();
+      }
+    };
+  }
+  function showMain(username){
+    currentUser = username;
+    authUsername.value = '';
+    authPassword.value = '';
+    authPin.value = '';
+    authScreen.style.display = 'none';
+    mainContent.style.display = 'flex';
+    greeting.textContent = `HI ${toUpper(username)}`;
+    greeting.style.display = 'block';
+  }
+  function showAuth(){
+    currentUser = null;
+    greeting.style.display = 'none';
+    mainContent.style.display = 'none';
+    authScreen.style.display = 'flex';
+    authUsername.focus();
+  }
+
+  authSubmit.onclick = () => {
+    const username = toUpper(authUsername.value);
+    const password = authPassword.value.trim();
+    const pin = authPin.value.trim();
+
+    if (!username || !password || pin.length !== 4) {
+      showPopup('Error', '<p>Enter USERNAME, PASSWORD and 4-digit PIN.</p>');
+      return;
+    }
+    if (accounts[username]) {
+      // Existing user login
+      if (accounts[username].password === password && accounts[username].pin === pin) {
+        showMain(username);
+      } else {
+        showPopup('Error', '<p>Incorrect password or PIN.</p>');
+      }
+    } else {
+      // New user creation - but check if username taken (recheck to be sure)
+      if(accounts[username]){
+        showPopup('Error', '<p>Username already exists. Please choose another username.</p>');
+        return;
+      }
+      showPopup('Create Account?', `<p>User "${username}" does not exist.<br>Create new account with this PASSWORD and PIN?</p>`, () => {
+        if(accounts[username]){
+          showPopup('Error', '<p>Username already exists. Please choose another username.</p>');
+          return;
+        }
+        accounts[username] = {
+          password: password,
+          pin: pin,
+          accountBalance: 0,
+          notes: createEmptyNotes()
+        };
+        saveAccounts();
+        popup.classList.add('hidden');
+        showMain(username);
+      }, true);
+    }
+  };
+
+  // Button Actions
+
+  document.getElementById('btnShowBalance').onclick = () => {
+    const acc = accounts[currentUser];
+    let html = `<p><strong>Your Account Balance:</strong> Rs. ${acc.accountBalance}</p>`;
+    html += `<p><strong>ATM Cash Balance:</strong> Rs. ${atmBalance(acc)}</p><hr>`;
+    for(let note of [1000,500,100,50,20,10,5]){
+      html += `<p>Rs. ${note} = ${acc.notes[note]} note(s)</p>`;
+    }
+    showPopup('Balance', html);
+  };
+
+  document.getElementById('btnInputMoney').onclick = () => {
+    showPopup('Input Money', `
+      <p>Camera input detection will be integrated here.</p>
+      <select id="noteType" autofocus>
+        <option value="5">Rs. 5</option>
+        <option value="10">Rs. 10</option>
+        <option value="20">Rs. 20</option>
+        <option value="50">Rs. 50</option>
+        <option value="100">Rs. 100</option>
+        <option value="500">Rs. 500</option>
+        <option value="1000">Rs. 1000</option>
+      </select>
+      <input id="noteCount" type="number" placeholder="Count" min="1" />
+    `, () => {
+      let note = parseInt(document.getElementById('noteType').value);
+      let count = parseInt(document.getElementById('noteCount').value);
+      if(!count || count < 1){
+        showPopup('Error', '<p>Invalid count.</p>');
+        return;
+      }
+      let acc = accounts[currentUser];
+      acc.notes[note] += count;
+      acc.accountBalance += note * count;
+      saveAccounts();
+      showPopup('Success', `<p>Added Rs. ${note} x ${count} notes.</p>`);
+    });
+  };
+
+  document.getElementById('btnWithdrawMoney').onclick = () => {
+    showPopup('Withdraw Money', `
+      <input id="withdrawAmt" type="number" placeholder="Amount to Withdraw" min="5" autofocus />
+    `, () => {
+      let amt = parseInt(document.getElementById('withdrawAmt').value);
+      let acc = accounts[currentUser];
+      if(!amt || amt < 5){
+        showPopup('Error', '<p>Enter a valid amount (min Rs. 5).</p>');
+        return;
+      }
+      if(amt > acc.accountBalance){
+        showPopup('Error', '<p>Insufficient account balance.</p>');
+        return;
+      }
+      // Check notes available
+      let notesNeeded = {};
+      let remaining = amt;
+      for(let note of [1000,500,100,50,20,10,5]){
+        let countNeeded = Math.floor(remaining / note);
+        let countAvailable = acc.notes[note];
+        let countUsed = Math.min(countNeeded, countAvailable);
+        notesNeeded[note] = countUsed;
+        remaining -= countUsed * note;
+      }
+      if(remaining > 0){
+        showPopup('Error', '<p>ATM does not have required notes for this amount.</p>');
+        return;
+      }
+      // Deduct notes and balance
+      for(let note in notesNeeded){
+        acc.notes[note] -= notesNeeded[note];
+      }
+      acc.accountBalance -= amt;
+      saveAccounts();
+      showPopup('Success', `<p>Withdrawn Rs. ${amt} successfully.</p>`);
+    });
+  };
+
+  document.getElementById('btnTransferMoney').onclick = () => {
+    showPopup('Transfer Money', `
+      <input id="transferName" placeholder="Recipient Name (CAPS)" autocapitalize="characters" autofocus />
+      <input id="transferPin" type="password" maxlength="4" placeholder="Recipient PIN" />
+      <input id="transferAmt" type="number" placeholder="Amount" min="1" />
+    `, () => {
+      let name = toUpper(document.getElementById('transferName').value);
+      let pin = document.getElementById('transferPin').value.trim();
+      let amt = parseInt(document.getElementById('transferAmt').value);
+      let sender = accounts[currentUser];
+
+      if(!name || !pin || !amt || amt < 1){
+        showPopup('Error', '<p>Fill all fields correctly.</p>');
+        return;
+      }
+      if(!accounts[name]){
+        showPopup('Error', '<p>Recipient does not exist.</p>');
+        return;
+      }
+      if(accounts[name].pin !== pin){
+        showPopup('Error', '<p>Incorrect recipient PIN.</p>');
+        return;
+      }
+      if(sender.accountBalance < amt){
+        showPopup('Error', '<p>Insufficient account balance.</p>');
+        return;
+      }
+      // Check ATM notes availability (like withdraw)
+      let remaining = amt;
+      let tempNotes = {...sender.notes};
+      for(let note of [1000,500,100,50,20,10,5]){
+        let needed = Math.floor(remaining / note);
+        if(needed > 0){
+          let available = tempNotes[note];
+          let used = Math.min(needed, available);
+          tempNotes[note] -= used;
+          remaining -= used * note;
+        }
+      }
+      if(remaining > 0){
+        showPopup('Error', '<p>ATM does not have required notes for this amount.</p>');
+        return;
+      }
+      // Deduct notes and balance from sender
+      let remaining2 = amt;
+      for(let note of [1000,500,100,50,20,10,5]){
+        let needed = Math.floor(remaining2 / note);
+        let used = Math.min(needed, sender.notes[note]);
+        sender.notes[note] -= used;
+        remaining2 -= used * note;
+      }
+      sender.accountBalance -= amt;
+
+      // Add to recipient notes and balance
+      let recipient = accounts[name];
+      let amountLeft = amt;
+      for(let note of [1000,500,100,50,20,10,5]){
+        let count = Math.floor(amountLeft / note);
+        if(count > 0){
+          recipient.notes[note] = (recipient.notes[note] || 0) + count;
+          amountLeft -= count * note;
+        }
+      }
+      recipient.accountBalance += amt;
+
+      saveAccounts();
+      showPopup('Success', `<p>Transferred Rs. ${amt} to ${name} successfully.</p>`);
+    });
+  };
+
+  document.getElementById('btnChangePin').onclick = () => {
+    showPopup('Change PIN', `
+      <input id="curPin" type="password" maxlength="4" placeholder="Current PIN" autofocus />
+      <input id="newPin" type="password" maxlength="4" placeholder="New 4-digit PIN" />
+      <input id="confPin" type="password" maxlength="4" placeholder="Confirm New PIN" />
+    `, () => {
+      let curPin = document.getElementById('curPin').value.trim();
+      let newPin = document.getElementById('newPin').value.trim();
+      let confPin = document.getElementById('confPin').value.trim();
+      let acc = accounts[currentUser];
+      if(curPin !== acc.pin){
+        showPopup('Error', '<p>Current PIN incorrect.</p>');
+        return;
+      }
+      if(newPin.length !== 4){
+        showPopup('Error', '<p>New PIN must be 4 digits.</p>');
+        return;
+      }
+      if(newPin !== confPin){
+        showPopup('Error', '<p>PIN confirmation does not match.</p>');
+        return;
+      }
+      acc.pin = newPin;
+      saveAccounts();
+      showPopup('Success', '<p>PIN changed successfully.</p>');
+    });
+  };
+
+  document.getElementById('btnLogout').onclick = () => {
+    showAuth();
+  };
+
+  // Start on load
+  showAuth();
+
+  // Accessibility: close popup on Escape key
+  popup.addEventListener('keydown', e => {
+    if(e.key === 'Escape') {
+      popup.classList.add('hidden');
+    }
+  });
+
+</script>
+</body>
+</html>
